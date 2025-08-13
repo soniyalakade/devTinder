@@ -1,0 +1,21 @@
+{
+  "name": "devtinder",
+  "version": "1.0.0",
+  "description": "tinder for devs",
+  "main": "]",
+  "scripts": {
+    "start" : "node src/app.js",
+    "dev" : "nodemon src/app.js"
+  },
+  "keywords": [
+    "node",
+    "js",
+    "javascript",
+    "backend"
+  ],
+  "author": "Soniya Lakade",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
