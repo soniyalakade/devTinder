@@ -111,16 +111,28 @@ app.patch("/user/:userId", async (req, res) =>{
     
 });
 
-app.get("/profile", async (req, res) =>{
+app.get("/profile", (req, res) => {
+  console.log("Profile route hit!");  // 👈 this tells us if the route is called at all
+  console.log("Cookies received:", req.cookies);
 
-    const cookies = req.cookies;
+  const { token } = req.cookies;
+  if (!token) {
+    return res.status(401).send("No token found in cookies");
+  }
 
-    const{token}=cookies;
-    //Validate token
-
-    console.log(cookies);
+  try {
+    const decodedMessage = jwt.verify(token, "DEV@Tinder$798");
+    console.log("Decoded message:", decodedMessage);
     res.send("Reading cookie.");
+  } catch (err) {
+    console.error("JWT verification failed:", err);
+    res.status(401).send("Invalid token");
+  }
 });
+
+
+
+
 
 app.post("/login", async (req, res) =>{
     try{
@@ -163,7 +175,5 @@ connectDB()
     .catch((err)=>{
         console.error("Database cannot be connected!");
     });
-
-
 
 
