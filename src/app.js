@@ -6,6 +6,7 @@ const {validateSignUpData} = require("./utils/validations")
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const {userAuth} = require("./middlewares/auth");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -39,101 +40,6 @@ app.post("/signup", async (req, res) => {
     }
 });
 
-//get user by email
-app.get("/user", async (req, res) => {
-    const userEmailId = req.body.emailId;
-
-    try{
-        const users = await User.find({emailId : userEmailId});
-        res.send(users);
-    }
-    catch(err){
-        res.status(400).send("Something went wrong!");
-    }
-});
-
-//get all users
-app.get("/feed", async (req, res) => {
-
-    try{
-        const users = await User.find({});
-        res.send(users);
-    }
-    catch(err){
-        res.status(400).send("Something went wrong!");
-    }
-});
-
-//delete user by id
-app.delete("/user", async (req, res) =>{
-
-    const userId= req.body.userId;
-
-    try{
-        const user = await User.findByIdAndDelete(userId);
-        res.send("User deleted successfully.");
-    }
-    catch(err){
-        res.status(400).send("Something went wrong!");
-    }
-})
-
-//update data of user
-app.patch("/user/:userId", async (req, res) =>{
-    const userId = req.params?.userId;
-    const data = req.body;
-
-    try{
-        const allowed_updates = ["skills","photoUrl", "about", "gender", "age"];
-
-        const isUpdateAllowed = Object.keys(data).every((k) =>
-            allowed_updates.includes(k)
-        );
-
-        if(!isUpdateAllowed){
-            throw new Error("Update not allowed.");
-        };
-
-        if(data?.skills.length>10){
-            throw new Error("Skills cannot be more than 10.");
-        }
-
-        const user = await User.findByIdAndUpdate({_id: userId}, data, {
-            runValidators: true,
-        });
-
-        res.send("User updated successfully.")
-    }
-
-    catch(err){
-        res.status(400).send("User cannot be updated."+ err.message);
-    }
-    
-});
-
-app.get("/profile", (req, res) => {
-  console.log("Profile route hit!");  // 👈 this tells us if the route is called at all
-  console.log("Cookies received:", req.cookies);
-
-  const { token } = req.cookies;
-  if (!token) {
-    return res.status(401).send("No token found in cookies");
-  }
-
-  try {
-    const decodedMessage = jwt.verify(token, "DEV@Tinder$798");
-    console.log("Decoded message:", decodedMessage);
-    res.send("Reading cookie.");
-  } catch (err) {
-    console.error("JWT verification failed:", err);
-    res.status(401).send("Invalid token");
-  }
-});
-
-
-
-
-
 app.post("/login", async (req, res) =>{
     try{
 
@@ -145,14 +51,13 @@ app.post("/login", async (req, res) =>{
             throw new Error("Invalid credentials.");
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await user.validatePassword(password);
 
         if(isPasswordValid){
 
-            token = await jwt.sign({_id: user._id}, "DEV@Tinder$798")
-            console.log(token);
+            const token = await user.getJWT();
 
-            res.cookie("token", token);
+            res.cookie("token", token, {expires: new Date(Date.now() + 7*24*60*60*1000), httpOnly: true});
             res.send("Login Successfull!");
         }
         else{
@@ -163,6 +68,28 @@ app.post("/login", async (req, res) =>{
     catch(err){
         res.status(400).send("ERROR: " + err.message);
     }
+});
+
+app.get("/profile", userAuth, async(req, res) => {
+
+  try {
+    const user = req.user;
+    res.send(user);
+  }
+
+  catch(err){
+        res.status(400).send("ERROR: "+ err.message);
+    }
+});
+
+app.post("/sendConnectionRequest", userAuth, async(req, res) =>{
+
+    const user = req.user;
+
+    //Sending connection request
+    console.log("Sending connection request");
+
+    res.send(user.firstName + " sent the connection request!");
 });
 
 connectDB()
