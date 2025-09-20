@@ -60,7 +60,6 @@ authRouter.post("/login", async (req, res) => {
     }
 });
 
-// ✅ Fixed logout
 authRouter.get("/logout", async (req, res) => {
     res.cookie("token", null, {
         expires: new Date(Date.now()),
