@@ -41,7 +41,7 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async(req, res) 
         const data = await connectionRequest.save();
 
         res.json({
-            message: "Conncetion Request sent successfully!",
+            message: req.user.firstName + " sent " + status + " request to " + toUser.firstName + " successfully!",
             data,
         })
     }
