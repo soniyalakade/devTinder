@@ -70,7 +70,6 @@ const userSchema = new mongoose.Schema({
 }
 );
 
-userSchema.index({emailId: 1});
 
 userSchema.methods.getJWT = async function() {
 

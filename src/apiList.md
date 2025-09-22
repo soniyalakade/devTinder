@@ -11,16 +11,14 @@
 -PATCH /profile/password -(forget password)
 
 ## connectionRequestRouter
--POST /request/send/interested/:userId
--POST /request/send/ignored/:userId
--POST /request/review/accepted/:requestId
--POST /request/review/rejected/:requestId
+-POST /request/send/:status/:userId
+-POST /request/review/:status/:userId
 
 ## userRouter
--GET /user/user/connections
+-GET /user/connections
 -GET /requests/received
 -GET /user/feed        - Gets you the profiles of other users on platform
 
 
 
-Status: ignore, interested, accepted, rejected
+Status: ignored, interested, accepted, rejected
