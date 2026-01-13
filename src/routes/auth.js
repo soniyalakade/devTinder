@@ -51,7 +51,7 @@ authRouter.post("/login", async (req, res) => {
         });
 
         // send back token too for Postman testing
-        res.status(200).send({
+        res.send({
             user, token
         });
     } catch (err) {
