@@ -7,7 +7,7 @@ const userAuth = async(req, res, next) => {
         //Read the tokens from req cookies
         const {token} = req.cookies;
         if(!token){
-            throw new Error("No token found!")
+           return res.status(401).send("Please login!");
         }
 
         //Validate the token
